@@ -25,6 +25,7 @@ runs:
     - name: Scan domains and generate JSON
       shell: bash
       run: |
+        chmod +x "${{ github.action_path }}/scan-domains.sh"
         "${{ github.action_path }}/scan-domains.sh" \
           --domains "${{ inputs.domains-file }}" \
           --output "${{ inputs.output-file }}" \
