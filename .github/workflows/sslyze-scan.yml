@@ -11,41 +11,59 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
-    - name: Install sslyze
+    - name: Install tools
       run: |
         pip install sslyze
+        sudo apt update && sudo apt install -y jq dnsutils  # jq for JSON, dig for IPs
     
-    - name: Verify domains.txt exists
+    - name: Ensure domains.txt
       run: |
         if [ ! -f domains.txt ]; then
-          echo "domains.txt missing - creating example"
-          echo -e "github.com\nexample.com" > domains.txt
+          echo "github.com" > domains.txt
+          echo "reddit.com" >> domains.txt
         fi
         cat domains.txt
     
-    - name: Run scan
+    - name: Scan domains
       run: |
-        ls -la testssl.py domains.txt  # Verify files
-        python3 testssl.py --domains domains.txt --json > domains-scan.json
+        domains=$(cat domains.txt)
+        results='[]'
+        for domain in $domains; do
+          echo "Scanning $domain..."
+          
+          # Resolve IPs
+          ips=$(dig +short $domain A | tr '\n' ' ' | tr -d '\n' | sed 's/ $//')
+          ips=${ips:-""}
+          
+          # sslyze JSON scan [web:30]
+          sslyze_json=$(python -m sslyze --json $domain:443 2>/dev/null || echo '{"error": "scan failed"}')
+          
+          # Extract TLS versions and ciphers with jq
+          tls_vers=$(echo "$sslyze_json" | jq -r '.[0].scanResult.acceptedProtocols // empty | map(.name) | join(", ")')
+          ciphers=$(echo "$sslyze_json" | jq -r '.[0].scanResult.tls1_2_cipher_suites.accepted_cipher_suites // [] | map(.cipher_suite.name) | join(", ") | .[:200]' || echo "")
+          
+          # Build result object
+          result=$(jq -n \
+            --arg d "$domain" \
+            --arg i "$ips" \
+            --arg t "$tls_vers" \
+            --arg c "$ciphers" \
+            '{domain: $d, ip_addresses: $i, tls_versions_supported: $t, list_of_ciphers: $c}')
+          
+          results=$(echo $results $result | jq -s '.[0] + [.[1]]')
+        done
         
-    - name: Show results preview
-      run: |
-        echo "Scan complete. First result:"
-        head -n 10 domains-scan.json
-
-    - name: Validate output
-      run: |
-        jq . domains-scan.json || cat domains-scan.json        
-        
-    - name: Upload JSON results
+        echo "$results" | jq . > domains-scan.json
+        cat domains-scan.json
+    
+    - name: Upload results
       if: always()
       uses: actions/upload-artifact@v4
       with:
