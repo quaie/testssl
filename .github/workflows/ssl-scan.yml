@@ -1,0 +1,28 @@
+name: SSL Scan & Commit Results
+
+on:
+  push:
+    paths: ['domains.txt']  # trigger on domains.txt changes
+  schedule:
+    - cron: '0 2 * * 1'     # weekly Mondays at 2AM UTC
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # needed to commit
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run testssl scanner
+      uses: ./.github/actions/testssl-scanner
+      with:
+        domains-file: domains.txt
+        output-file: testssl-results.json
+
+    - name: Commit JSON results
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        file_pattern: testssl-results.json
+        commit_message: 'Update testssl results [${{ github.run_id }}]'
