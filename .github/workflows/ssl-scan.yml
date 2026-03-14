@@ -24,12 +24,12 @@ jobs:
         output-file: testssl-results.json
 
 
-    - name: Debug raw testssl output
-      run: |
-        echo "Domains:"
-        cat domains.txt
-        echo "Trying single domain manually:"
-        head -1 domains.txt | xargs -I {} ./testssl.sh {} || echo "testssl.sh error"
+#    - name: Debug raw testssl output
+#      run: |
+#        echo "Domains:"
+#        cat domains.txt
+#        echo "Trying single domain manually:"
+#        head -1 domains.txt | xargs -I {} ./testssl.sh {} || echo "testssl.sh error"
 
 
     - name: Debug - Verify file exists and contents
@@ -56,9 +56,9 @@ jobs:
           git push
         fi
 
-    # Remove this after debugging works
-    # - name: Commit results (original)
-    #   uses: stefanzweifel/git-auto-commit-action@v5
-    #   with:
-    #     file_pattern: testssl-results.json
-    #     commit_message: 'Update testssl results [${{ github.run_id }}]'
+    ## Remove this after debugging works
+    #- name: Commit results (original)
+    #  uses: stefanzweifel/git-auto-commit-action@v5
+    #  with:
+    #    file_pattern: testssl-results.json
+    #    commit_message: 'Update testssl results [${{ github.run_id }}]'
