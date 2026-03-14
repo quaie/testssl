@@ -2,27 +2,54 @@ name: SSL Scan & Commit Results
 
 on:
   push:
-    paths: ['domains.txt']  # trigger on domains.txt changes
+    paths: ['domains.txt']
   schedule:
-    - cron: '0 2 * * 1'     # weekly Mondays at 2AM UTC
+    - cron: '0 2 * * 1'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   scan:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write        # needed to commit
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Run testssl scanner
+      id: scanner
       uses: ./.github/actions/testssl-scanner
       with:
         domains-file: domains.txt
         output-file: testssl-results.json
 
-    - name: Commit JSON results
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        file_pattern: testssl-results.json
-        commit_message: 'Update testssl results [${{ github.run_id }}]'
+    - name: Debug: Verify file exists and contents
+      if: always()
+      run: |
+        ls -la testssl-results.json || echo "❌ File missing!"
+        echo "File size: $(wc -c < testssl-results.json 2>/dev/null || echo 0)"
+        echo "First 500 chars:"
+        head -500 testssl-results.json || echo "Empty/missing"
+        git status
+        git diff testssl-results.json || echo "No git diff detected"
+
+    - name: Force-add and commit JSON
+      if: always()
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add testssl-results.json
+        git status
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Update testssl results [${{ github.run_id }}] ($(date +%Y-%m-%d))"
+          git push
+        fi
+
+    # Remove this after debugging works
+    # - name: Commit results (original)
+    #   uses: stefanzweifel/git-auto-commit-action@v5
+    #   with:
+    #     file_pattern: testssl-results.json
+    #     commit_message: 'Update testssl results [${{ github.run_id }}]'
