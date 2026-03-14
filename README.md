@@ -1,2 +1,3 @@
-# testssl
-run testssl on a list and put the output back in the repo
+# checkssl
+
+runs sslyze on a list of domains and returns a list with details (ip, tls versions, ciphers)
