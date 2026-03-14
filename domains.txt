@@ -1,3 +1,5 @@
 reddit.com
 cnn.com
 bbc.co.uk
+msnbc.com
+google.com
