@@ -4,16 +4,18 @@ import sys
 import json
 from pathlib import Path
 from typing import List, Dict, Any
-from sslyze import ScannableServer, ServerScanRequest
-from sslyze.scanner.scanner import Scanner
-from sslyze.server_connectivity import ServerConnectivityTester
-from sslyze.errors import ConnectionToServerError
 import socket
+
+# Correct sslyze 6.x imports [web:30][web:18]
+from sslyze.server_connectivity import ServerConnectivityTester
+from sslyze.scanner.scanner import Scanner
+from sslyze.server_scan_request import ServerScanRequest
+from sslyze.errors import ServerHostnameCouldNotBeResolved, ConnectionToServerError
 
 def resolve_ips(domain: str) -> str:
     try:
-        ips = socket.getaddrinfo(domain, None, family=socket.AF_INET)
-        return ", ".join(ip[4][0] for ip in ips if ip[4][0])
+        ips = [str(ip) for ip in socket.getaddrinfo(domain, None, family=socket.AF_INET)]
+        return ", ".join(set(ips))  # Unique
     except:
         return ""
 
@@ -23,17 +25,17 @@ def scan_domain(domain: str) -> Dict[str, str]:
     
     try:
         tester = ServerConnectivityTester()
-        server_info = tester.perform(target, sni=domain)
-    except ConnectionToServerError:
+        server_info = tester.perform(target, hostname=domain)  # SNI via hostname
+    except (ServerHostnameCouldNotBeResolved, ConnectionToServerError):
         return {"domain": domain, "ip_addresses": ips, "tls_versions_supported": "", "list_of_ciphers": ""}
     
     scanner = Scanner()
-    queue = [ServerScanRequest(server_info=server_info)]
-    scanner.queue_scans(queue)
+    request = ServerScanRequest(server_info=server_info)
+    scanner.queue_scan(request)
     
-    for server_scan_result in scanner.get_results():
-        tls_versions = ", ".join(p.name for p in server_scan_result.accepted_protocols)
-        ciphers = ", ".join(c.name for c in server_scan_result.accepted_ciphers[:20])  # Top 20
+    for completed_scan in scanner.get_results():
+        tls_versions = ", ".join(proto.name for proto in completed_scan.accepted_protocols)
+        ciphers = ", ".join(cipher.name for cipher in completed_scan.cipher_suites.accepted_cipher_suites)[:200]  # Trunc
         return {
             "domain": domain,
             "ip_addresses": ips,
@@ -45,7 +47,7 @@ def scan_domain(domain: str) -> Dict[str, str]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--domains", default="domains.txt", help="Domains file")
+    parser.add_argument("--domains", default="domains.txt")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
     
@@ -58,7 +60,7 @@ def main():
     results: List[Dict[str, str]] = []
     
     for domain in domains:
-        print(f"Scanning {domain}...")
+        sys.stderr.write(f"Scanning {domain}...\n")
         result = scan_domain(domain)
         results.append(result)
     
@@ -66,7 +68,7 @@ def main():
         print(json.dumps(results, indent=2))
     else:
         for r in results:
-            print(json.dumps(r, indent=2))
+            print(json.dumps(r))
 
 if __name__ == "__main__":
     main()
