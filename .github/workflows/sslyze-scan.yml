@@ -11,20 +11,37 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
     
-    - name: Set up Python
+    - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
-    - name: Install dependencies
-      run: pip install sslyze
+    - name: Install sslyze
+      run: |
+        pip install sslyze
     
-    - name: Run multi-domain scan
-      run: python testssl.py --domains domains.txt --json > domains-scan.json
-      
-    - name: Upload results
+    - name: Verify domains.txt exists
+      run: |
+        if [ ! -f domains.txt ]; then
+          echo "domains.txt missing - creating example"
+          echo -e "github.com\nexample.com" > domains.txt
+        fi
+        cat domains.txt
+    
+    - name: Run scan
+      run: |
+        python testssl.py --domains domains.txt --json > domains-scan.json
+        
+    - name: Show results preview
+      run: |
+        echo "Scan complete. First result:"
+        head -n 10 domains-scan.json
+        
+    - name: Upload JSON results
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: domains-sslyze-results
