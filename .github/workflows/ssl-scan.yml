@@ -23,7 +23,7 @@ jobs:
         domains-file: domains.txt
         output-file: testssl-results.json
 
-    - name: Debug: Verify file exists and contents
+    - name: Debug - Verify file exists and contents
       if: always()
       run: |
         ls -la testssl-results.json || echo "❌ File missing!"
