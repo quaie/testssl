@@ -1,8 +1,8 @@
 [
   {
     "domain": "reddit.com",
-    "ip_v4": "151.101.65.140",
-    "ip_v6": "2a04:4e42:400::396",
+    "ip_v4": "151.101.1.140",
+    "ip_v6": "2a04:4e42:200::396",
     "tls_versions": [
       "TLS 1.2",
       "TLS 1.3"
@@ -28,13 +28,13 @@
         ]
       }
     ],
-    "scanned_at": "2026-03-14T18:20:45.583403+00:00",
+    "scanned_at": "2026-03-14T18:30:32.234399+00:00",
     "error": null
   },
   {
     "domain": "cnn.com",
-    "ip_v4": "151.101.3.5",
-    "ip_v6": "2a04:4e42:400::773",
+    "ip_v4": "151.101.195.5",
+    "ip_v6": "2a04:4e42:200::773",
     "tls_versions": [
       "TLS 1.2",
       "TLS 1.3"
@@ -56,7 +56,7 @@
         ]
       }
     ],
-    "scanned_at": "2026-03-14T18:20:46.076031+00:00",
+    "scanned_at": "2026-03-14T18:30:33.336189+00:00",
     "error": null
   },
   {
@@ -88,12 +88,12 @@
         ]
       }
     ],
-    "scanned_at": "2026-03-14T18:20:46.525828+00:00",
+    "scanned_at": "2026-03-14T18:30:34.431359+00:00",
     "error": null
   },
   {
     "domain": "msnbc.com",
-    "ip_v4": "13.248.160.137",
+    "ip_v4": "99.83.186.106",
     "ip_v6": "",
     "tls_versions": [
       "TLS 1.2",
@@ -117,13 +117,13 @@
         ]
       }
     ],
-    "scanned_at": "2026-03-14T18:20:46.988057+00:00",
+    "scanned_at": "2026-03-14T18:30:35.477617+00:00",
     "error": null
   },
   {
     "domain": "google.com",
-    "ip_v4": "142.251.41.142",
-    "ip_v6": "2607:f8b0:4009:812::200e",
+    "ip_v4": "142.251.46.78",
+    "ip_v6": "2607:f8b0:400a:80d::200e",
     "tls_versions": [
       "TLS 1.0",
       "TLS 1.1",
@@ -172,7 +172,46 @@
         ]
       }
     ],
-    "scanned_at": "2026-03-14T18:20:55.612907+00:00",
+    "scanned_at": "2026-03-14T18:30:37.891908+00:00",
+    "error": null
+  },
+  {
+    "domain": "inexistent-domain.org",
+    "ip_v4": "",
+    "ip_v6": "",
+    "tls_versions": [],
+    "ciphers": [],
+    "scanned_at": "2026-03-14T18:30:38.942425+00:00",
+    "error": "Could not resolve inexistent-domain.org"
+  },
+  {
+    "domain": "debian.org",
+    "ip_v4": "151.101.2.132",
+    "ip_v6": "2a04:4e42:600::644",
+    "tls_versions": [
+      "TLS 1.2",
+      "TLS 1.3"
+    ],
+    "ciphers": [
+      {
+        "TLS 1.2": [
+          "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+          "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+          "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+          "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"
+        ]
+      },
+      {
+        "TLS 1.3": [
+          "TLS_CHACHA20_POLY1305_SHA256",
+          "TLS_AES_256_GCM_SHA384",
+          "TLS_AES_128_GCM_SHA256"
+        ]
+      }
+    ],
+    "scanned_at": "2026-03-14T18:30:39.144433+00:00",
     "error": null
   }
 ]
