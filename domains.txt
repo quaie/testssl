@@ -3,3 +3,5 @@ cnn.com
 bbc.co.uk
 msnbc.com
 google.com
+inexistent-domain.org
+debian.org
